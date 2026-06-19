@@ -128,6 +128,7 @@ export type AdminView =
   | { name: "categories" }
   | { name: "orders" }
   | { name: "users" }
-  | { name: "settings" };
+  | { name: "settings" }
+  | { name: "seo-perf" };
 
 export type AppMode = "storefront" | "admin";

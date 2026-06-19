@@ -8,6 +8,7 @@ import { AdminCategories } from "@/components/admin/pages/categories";
 import { AdminOrders } from "@/components/admin/pages/orders";
 import { AdminUsers } from "@/components/admin/pages/users";
 import { AdminSettings } from "@/components/admin/pages/settings";
+import { AdminSeoPerf } from "@/components/admin/pages/seo-perf";
 import { useAppStore } from "@/lib/store/app-store";
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
         {adminView.name === "categories" && <AdminCategories />}
         {adminView.name === "orders" && <AdminOrders />}
         {adminView.name === "users" && <AdminUsers />}
+        {adminView.name === "seo-perf" && <AdminSeoPerf />}
         {adminView.name === "settings" && <AdminSettings />}
       </AdminLayout>
     );

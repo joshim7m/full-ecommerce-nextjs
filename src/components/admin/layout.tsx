@@ -2,7 +2,7 @@
 
 import {
   LayoutDashboard, Package, Tag, ShoppingCart, Users, Settings,
-  Baby, ArrowLeft, Menu, X, Bell, Search,
+  Baby, ArrowLeft, Menu, X, Bell, Search, Gauge,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ const NAV_ITEMS: Array<{ name: AdminView["name"]; label: string; icon: typeof Pa
   { name: "categories", label: "Categories", icon: Tag },
   { name: "orders", label: "Orders", icon: ShoppingCart },
   { name: "users", label: "Users", icon: Users },
+  { name: "seo-perf", label: "SEO & Perf", icon: Gauge },
   { name: "settings", label: "Settings", icon: Settings },
 ];
 
@@ -120,6 +121,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               {adminView.name === "categories" && "Organize products into categories"}
               {adminView.name === "orders" && "Track and fulfill customer orders"}
               {adminView.name === "users" && "Manage user accounts and roles"}
+              {adminView.name === "seo-perf" && "SEO schemas, performance, and infrastructure"}
               {adminView.name === "settings" && "Configure store settings"}
             </p>
           </div>

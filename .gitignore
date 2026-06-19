@@ -1,7 +1,10 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# =============================================================================
+# Baby Planet BD Clone — .gitignore
+# Covers: Next.js, Express backend, Prisma, Docker, NGINX, deploy artifacts
+# =============================================================================
 
-# dependencies
-node_modules
+# ----- Dependencies -----
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -9,46 +12,86 @@ node_modules
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+backend/node_modules/
 
-# testing
-/coverage
-
-# next.js
+# ----- Next.js -----
 /.next/
 /out/
+next-env.d.ts
+*.tsbuildinfo
 
-# production
+# ----- Build artifacts -----
 /build
+dist/
+backend/dist/
+*.tsbuildinfo
 
-# misc
-.DS_Store
-*.pem
+# ----- Environment files (NEVER commit real secrets) -----
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+# Keep examples — they're safe to commit
+!.env.example
+!.env.production.example
 
-# debug
+# ----- Databases (local dev only) -----
+db/*.db
+db/*.db-journal
+*.sqlite
+*.sqlite3
+backend/prisma/migrations/dev.db
+backend/prisma/migrations/dev.db-journal
+
+# ----- Logs -----
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-local-*
-.claude
-.z-ai-config
-*.log
 dev.log
 dev.out.log
-test
-prompt
-
 server.log
-# Skills directory
+backend/logs/
+
+# ----- Docker (local volumes + state) -----
+nginx/cache/
+nginx/logs/
+docker-data/
+
+# ----- OS / Editor -----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.local-*
+
+# ----- Testing -----
+/coverage
+*.lcov
+
+# ----- Vercel -----
+.vercel
+
+# ----- Misc project-internal -----
+.claude
+.z-ai-config
 /skills/
+prompt
+test
+upload/
+
+# ----- Prisma generated client (regenerated on install) -----
+backend/node_modules/.prisma/
+
+# ----- NGINX runtime -----
+nginx_cache/
+var/cache/nginx/
+
+# ----- Let's Encrypt (local certbot testing) -----
+certbot_certs/
+certbot_webroot/

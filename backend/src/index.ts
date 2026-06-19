@@ -2,7 +2,8 @@
 // Baby Planet BD Backend — Express Application Entry Point
 // -----------------------------------------------------------------------------
 // Boots Express, registers middlewares, mounts route groups, and starts the
-// HTTP server. Phase 2 will flesh out the controllers & services referenced here.
+// HTTP server. Phase 2: full auth (JWT + Google OAuth), CRUD endpoints for
+// Categories / Products / Orders, and the Redis cache layer.
 // =============================================================================
 
 import express from "express";
@@ -12,12 +13,18 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
+import passport from "passport";
 
 import { env } from "./config/env";
 import { logger } from "./config/logger";
 import { getRedisClient, cache } from "./config/redis";
 import { prisma, disconnectPrisma } from "./config/prisma";
+import { configurePassport } from "./config/passport";
 import { healthRouter } from "./routes/health.routes";
+import { authRouter } from "./routes/auth.routes";
+import { categoryRouter } from "./routes/category.routes";
+import { productRouter } from "./routes/product.routes";
+import { orderRouter } from "./routes/order.routes";
 import { apiNotFound } from "./middlewares/not-found.middleware";
 import { errorHandler } from "./middlewares/error-handler.middleware";
 
@@ -39,10 +46,13 @@ async function bootstrap(): Promise<void> {
     logger.warn("⚠️  Redis cache layer is NOT reachable — app will continue without cache");
   }
 
-  // 2. Create Express app
+  // 2. Configure Passport (Google OAuth)
+  configurePassport();
+
+  // 3. Create Express app
   const app = express();
 
-  // 3. Security & parsing middlewares
+  // 4. Security & parsing middlewares
   app.use(
     helmet({
       contentSecurityPolicy: env.isProduction,
@@ -61,17 +71,22 @@ async function bootstrap(): Promise<void> {
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
   app.use(cookieParser());
 
-  // 4. HTTP request logging
+  // 5. Initialize Passport (for Google OAuth routes)
+  app.use(passport.initialize());
+
+  // 6. HTTP request logging
   app.use(
     morgan(env.isProduction ? "combined" : "dev", {
       stream: { write: (msg: string) => logger.info(msg.trim()) },
     }),
   );
 
-  // 5. Global rate limiter (uses Redis as the store in production)
+  // 7. Global rate limiter (uses Redis as the store in production)
   const redisClient = getRedisClient();
   const limiter = rateLimit({
-    store: redisOk ? new RedisStore({ sendCommand: (...args) => redisClient.call(...args) }) : undefined,
+    store: redisOk
+      ? new RedisStore({ sendCommand: (...args: unknown[]) => redisClient.call(...args) as unknown as Promise<unknown> })
+      : undefined,
     windowMs: env.rateLimit.windowMs,
     max: env.rateLimit.max,
     standardHeaders: true,
@@ -83,36 +98,43 @@ async function bootstrap(): Promise<void> {
   });
   app.use(env.apiPrefix, limiter);
 
-  // 6. Mount route groups
+  // 8. Mount route groups
   app.get("/", (_req, res) => {
     res.json({
       name: "Baby Planet BD API",
-      version: "1.0.0",
-      phase: "Phase 1 — Initialization, Models, and Realistic Seeders",
+      version: "2.0.0",
+      phase: "Phase 2 — Express Backend Core API, Auth & Redis",
       docs: `${env.apiPrefix}/health`,
+      endpoints: {
+        auth: `${env.apiPrefix}/auth`,
+        categories: `${env.apiPrefix}/categories`,
+        products: `${env.apiPrefix}/products`,
+        orders: `${env.apiPrefix}/orders`,
+      },
     });
   });
 
   app.use(env.apiPrefix, healthRouter);
+  app.use(`${env.apiPrefix}/auth`, authRouter);
+  app.use(`${env.apiPrefix}/categories`, categoryRouter);
+  app.use(`${env.apiPrefix}/products`, productRouter);
+  app.use(`${env.apiPrefix}/orders`, orderRouter);
 
-  // Phase 2 routes (will be mounted here):
-  //   app.use(`${env.apiPrefix}/auth`, authRouter);
-  //   app.use(`${env.apiPrefix}/categories`, categoryRouter);
-  //   app.use(`${env.apiPrefix}/products`, productRouter);
-  //   app.use(`${env.apiPrefix}/orders`, orderRouter);
-  //   app.use(`${env.apiPrefix}/admin`, adminRouter);
-
-  // 7. 404 + error handlers (must be last)
+  // 9. 404 + error handlers (must be last)
   app.use(apiNotFound);
   app.use(errorHandler);
 
-  // 8. Start server
+  // 10. Start server
   const server = app.listen(env.port, () => {
     logger.info(`🌟 Server listening on http://localhost:${env.port}${env.apiPrefix}`);
     logger.info(`   → Health check: http://localhost:${env.port}${env.apiPrefix}/health`);
+    logger.info(`   → Auth:         http://localhost:${env.port}${env.apiPrefix}/auth`);
+    logger.info(`   → Categories:   http://localhost:${env.port}${env.apiPrefix}/categories`);
+    logger.info(`   → Products:     http://localhost:${env.port}${env.apiPrefix}/products`);
+    logger.info(`   → Orders:       http://localhost:${env.port}${env.apiPrefix}/orders`);
   });
 
-  // 9. Graceful shutdown
+  // 11. Graceful shutdown
   const shutdown = async (signal: string) => {
     logger.info(`\n${signal} received — shutting down gracefully...`);
     server.close(async () => {
@@ -146,5 +168,5 @@ bootstrap().catch((err) => {
   process.exit(1);
 });
 
-// Suppress unused warning in Phase 1 — prisma will be used by Phase 2 controllers.
+// Suppress unused warning — prisma will be used by Phase 2 controllers.
 void prisma;

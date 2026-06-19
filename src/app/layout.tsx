@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Baby Planet BD Clone — Phase 1 Foundation",
+  title: "Baby Planet BD Clone — Phase 2 Express API + Auth + Redis",
   description:
-    "Production-ready foundation for the Baby Planet BD e-commerce clone. Next.js 16 + Express + PostgreSQL + Prisma + Redis. Phase 1 covers project init, Prisma schema, and 25-product seeder.",
+    "Production-ready Phase 2 backend for the Baby Planet BD e-commerce clone. Express 4 + JWT + Google OAuth + Prisma + Redis cache layer with invalidation. 38 endpoints across Auth, Categories, Products, Orders.",
   keywords: [
     "Baby Planet BD",
     "e-commerce",
@@ -25,12 +25,14 @@ export const metadata: Metadata = {
     "Prisma",
     "PostgreSQL",
     "Redis",
+    "JWT",
+    "Google OAuth",
     "Bangladesh",
   ],
   authors: [{ name: "Baby Planet BD Clone" }],
   openGraph: {
-    title: "Baby Planet BD Clone — Phase 1",
-    description: "Production-ready foundation: Next.js + Express + PostgreSQL + Redis",
+    title: "Baby Planet BD Clone — Phase 2",
+    description: "Express API + JWT Auth + Redis cache — 38 endpoints ready",
     type: "website",
   },
 };

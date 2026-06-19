@@ -14,25 +14,23 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Baby Planet BD Clone — Phase 2 Express API + Auth + Redis",
+  title: "Baby Planet BD — Premium Baby Products in Bangladesh",
   description:
-    "Production-ready Phase 2 backend for the Baby Planet BD e-commerce clone. Express 4 + JWT + Google OAuth + Prisma + Redis cache layer with invalidation. 38 endpoints across Auth, Categories, Products, Orders.",
+    "Shop premium baby bottles, breast pumps, clothing, and more at Baby Planet BD. Cash on Delivery available across Bangladesh. Fast delivery inside Dhaka.",
   keywords: [
     "Baby Planet BD",
-    "e-commerce",
-    "Next.js",
-    "Express",
-    "Prisma",
-    "PostgreSQL",
-    "Redis",
-    "JWT",
-    "Google OAuth",
-    "Bangladesh",
+    "baby products Bangladesh",
+    "Philips Avent",
+    "breast pump",
+    "baby bottles",
+    "baby clothing",
+    "mom care",
+    "e-commerce Bangladesh",
   ],
-  authors: [{ name: "Baby Planet BD Clone" }],
+  authors: [{ name: "Baby Planet BD" }],
   openGraph: {
-    title: "Baby Planet BD Clone — Phase 2",
-    description: "Express API + JWT Auth + Redis cache — 38 endpoints ready",
+    title: "Baby Planet BD — Premium Baby Products in Bangladesh",
+    description: "Everything your baby needs, delivered with love. COD available.",
     type: "website",
   },
 };

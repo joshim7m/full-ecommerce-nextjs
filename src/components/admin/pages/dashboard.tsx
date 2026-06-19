@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { useAppStore } from "@/lib/store/app-store";
+import { useRouter } from "next/navigation";
 import { getOrderStats, ORDERS, PRODUCTS } from "@/lib/mock-data";
 import { formatBdt, formatBdtCompact, timeAgo } from "@/lib/format";
 import { ORDER_STATUS_BADGES } from "../badges";
@@ -22,7 +22,7 @@ const ORDER_STATUS_ICONS = {
 } as const;
 
 export function AdminDashboard() {
-  const { setAdminView } = useAppStore();
+  const router = useRouter();
   const stats = getOrderStats();
   const recentOrders = [...ORDERS].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
   const lowStockProducts = PRODUCTS.filter((p) => p.stock <= p.lowStockThreshold).slice(0, 5);
@@ -47,7 +47,7 @@ export function AdminDashboard() {
           delta="+8.2%"
           deltaUp
           accent="blue"
-          onClick={() => setAdminView({ name: "orders" })}
+          onClick={() => router.push("/admin/orders")}
         />
         <StatCard
           icon={Package}
@@ -56,7 +56,7 @@ export function AdminDashboard() {
           delta="+3"
           deltaUp
           accent="amber"
-          onClick={() => setAdminView({ name: "products" })}
+          onClick={() => router.push("/admin/products")}
         />
         <StatCard
           icon={Users}
@@ -83,7 +83,7 @@ export function AdminDashboard() {
               return (
                 <button
                   key={status}
-                  onClick={() => setAdminView({ name: "orders" })}
+                  onClick={() => router.push("/admin/orders")}
                   className="flex flex-col gap-2 rounded-lg border bg-card p-3 text-left transition-shadow hover:shadow-sm"
                 >
                   <div className="flex items-center justify-between">
@@ -113,7 +113,7 @@ export function AdminDashboard() {
                 <CardTitle className="text-base">Recent Orders</CardTitle>
                 <CardDescription>Latest customer purchases</CardDescription>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setAdminView({ name: "orders" })}>
+              <Button variant="ghost" size="sm" onClick={() => router.push("/admin/orders")}>
                 View all
               </Button>
             </div>
@@ -155,7 +155,7 @@ export function AdminDashboard() {
                 <CardTitle className="text-base">Top Selling Products</CardTitle>
                 <CardDescription>By sales count</CardDescription>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setAdminView({ name: "products" })}>
+              <Button variant="ghost" size="sm" onClick={() => router.push("/admin/products")}>
                 View all
               </Button>
             </div>

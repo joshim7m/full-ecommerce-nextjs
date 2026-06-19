@@ -1,20 +1,27 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, ShoppingCart, Menu, X, Baby, Heart, User, ChevronRight, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, ShoppingCart, Menu, X, Baby, Heart, User, ChevronRight, Sparkles, LayoutDashboard, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useCartStore } from "@/lib/store/cart-store";
 import { useAppStore } from "@/lib/store/app-store";
+import Link from "next/link";
 import { CATEGORIES } from "@/lib/mock-data";
 import { searchProducts } from "@/lib/mock-data";
 import { formatBdt } from "@/lib/format";
 
+function getCatIcon(_id: string): React.ReactNode {
+  return <Tag className="h-5 w-5 text-muted-foreground" />;
+}
+
 export function StorefrontHeader() {
+  const router = useRouter();
   const { items, openCart } = useCartStore();
-  const { goHome, goCategory, goProduct, goSearch, setMobileMenuOpen, mobileMenuOpen, setMode, mode } = useAppStore();
+  const { mobileMenuOpen, setMobileMenuOpen } = useAppStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<ReturnType<typeof searchProducts>>([]);
   const [showResults, setShowResults] = useState(false);
@@ -23,18 +30,15 @@ export function StorefrontHeader() {
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
-  // Sticky shadow on scroll
   useEffect(() => {
     const handler = () => setIsScrolled(window.scrollY > 8);
     window.addEventListener("scroll", handler);
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  // Debounced search (300ms)
   useEffect(() => {
     const trimmed = searchQuery.trim();
     if (!trimmed) {
-      // Use a microtask to avoid synchronous setState in effect body
       const t = setTimeout(() => {
         setSearchResults([]);
         setShowResults(false);
@@ -49,7 +53,6 @@ export function StorefrontHeader() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Close search dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
@@ -63,7 +66,8 @@ export function StorefrontHeader() {
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (searchQuery.trim()) {
-      goSearch(searchQuery.trim());
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery("");
       setShowResults(false);
     }
   }
@@ -106,32 +110,34 @@ export function StorefrontHeader() {
               </SheetTitle>
             </SheetHeader>
             <nav className="mt-4 flex flex-col gap-1">
-              <button
-                onClick={() => goHome()}
+              <Link
+                href="/"
+                onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium hover:bg-accent"
               >
                 Home
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </button>
+              </Link>
               <div className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Shop by Category
               </div>
               {CATEGORIES.map((cat) => (
-                <button
+                <Link
                   key={cat.id}
-                  onClick={() => goCategory(cat.slug)}
+                  href={`/category/${cat.slug}`}
+                  onClick={() => setMobileMenuOpen(false)}
                   className="flex items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm hover:bg-accent"
                 >
                   <span className="flex items-center gap-2">
-                    <span className="text-lg">{cat.iconUrl?.match(/text=([^&]+)/)?.[1] ?? "📦"}</span>
+                    {getCatIcon(cat.id)}
                     {cat.name}
                   </span>
                   <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                </button>
+                </Link>
               ))}
               <div className="mt-3 border-t pt-3">
-                <button
-                  onClick={() => setMode("admin")}
+                <Link
+                  href="/admin/login"
                   className="flex w-full items-center justify-between rounded-lg bg-accent px-3 py-2.5 text-left text-sm font-medium hover:bg-accent/80"
                 >
                   <span className="flex items-center gap-2">
@@ -139,15 +145,15 @@ export function StorefrontHeader() {
                     Admin Dashboard
                   </span>
                   <ChevronRight className="h-4 w-4" />
-                </button>
+                </Link>
               </div>
             </nav>
           </SheetContent>
         </Sheet>
 
         {/* Logo */}
-        <button
-          onClick={() => goHome()}
+        <Link
+          href="/"
           className="flex shrink-0 items-center gap-2"
           aria-label="Go to homepage"
         >
@@ -158,24 +164,24 @@ export function StorefrontHeader() {
             <div className="text-lg font-bold leading-tight text-foreground">Baby Planet</div>
             <div className="-mt-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Bangladesh</div>
           </div>
-        </button>
+        </Link>
 
         {/* Desktop navigation */}
         <nav className="hidden flex-1 items-center gap-1 lg:flex">
-          <button
-            onClick={() => goHome()}
+          <Link
+            href="/"
             className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
           >
             Home
-          </button>
+          </Link>
           {CATEGORIES.slice(0, 5).map((cat) => (
-            <button
+            <Link
               key={cat.id}
-              onClick={() => goCategory(cat.slug)}
+              href={`/category/${cat.slug}`}
               className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
             >
               {cat.name.split(" ")[0]}
-            </button>
+            </Link>
           ))}
         </nav>
 
@@ -196,7 +202,6 @@ export function StorefrontHeader() {
             </div>
           </form>
 
-          {/* Search dropdown */}
           {showResults && searchResults.length > 0 && (
             <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-96 overflow-y-auto rounded-xl border bg-popover shadow-lg">
               <div className="border-b px-3 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -206,7 +211,7 @@ export function StorefrontHeader() {
                 <button
                   key={p.id}
                   onClick={() => {
-                    goProduct(p.slug);
+                    router.push(`/product/${p.slug}`);
                     setShowResults(false);
                     setSearchQuery("");
                   }}
@@ -227,7 +232,7 @@ export function StorefrontHeader() {
               ))}
               <button
                 onClick={() => {
-                  goSearch(searchQuery);
+                  router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
                   setShowResults(false);
                 }}
                 className="flex w-full items-center justify-center gap-1 border-t bg-muted/30 px-3 py-2.5 text-sm font-medium text-primary hover:bg-muted/50"
@@ -254,9 +259,11 @@ export function StorefrontHeader() {
             size="icon"
             className="hidden sm:inline-flex"
             aria-label="Account"
-            onClick={() => setMode("admin")}
+            asChild
           >
-            <User className="h-5 w-5" />
+            <Link href="/admin/login">
+              <User className="h-5 w-5" />
+            </Link>
           </Button>
           <Button
             variant="ghost"
@@ -276,10 +283,12 @@ export function StorefrontHeader() {
             variant="ghost"
             size="icon"
             className="hidden lg:inline-flex"
-            aria-label="Toggle admin mode"
-            onClick={() => setMode(mode === "storefront" ? "admin" : "storefront")}
+            aria-label="Admin dashboard"
+            asChild
           >
-            <X className="h-5 w-5" />
+            <Link href="/admin/dashboard">
+              <LayoutDashboard className="h-5 w-5" />
+            </Link>
           </Button>
         </div>
       </div>

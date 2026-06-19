@@ -1,10 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { CheckCircle2, Home, Package, Truck, Copy, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAppStore } from "@/lib/store/app-store";
 import { useToast } from "@/hooks/use-toast";
 
 interface OrderSuccessProps {
@@ -12,7 +12,7 @@ interface OrderSuccessProps {
 }
 
 export function StorefrontOrderSuccess({ orderNumber }: OrderSuccessProps) {
-  const { goHome } = useAppStore();
+  const router = useRouter();
   const { toast } = useToast();
 
   function copyOrderNumber() {
@@ -67,7 +67,7 @@ export function StorefrontOrderSuccess({ orderNumber }: OrderSuccessProps) {
       </div>
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
-        <Button onClick={goHome} size="lg" className="gap-2">
+        <Button onClick={() => router.push("/")} size="lg" className="gap-2">
           <Home className="h-4 w-4" /> Continue Shopping
         </Button>
         <Button variant="outline" size="lg" className="gap-2">

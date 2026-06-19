@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Home, ChevronRight, Package, ArrowUpDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Home, ChevronRight, Package, ArrowUpDown, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProductCard } from "../product-card";
 import { getCategoryBySlug, getProductsByCategory } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store/app-store";
 
 interface CategoryPageProps {
   slug: string;
@@ -16,7 +16,7 @@ interface CategoryPageProps {
 type SortOption = "newest" | "price_asc" | "price_desc" | "name_asc" | "best_selling";
 
 export function StorefrontCategory({ slug }: CategoryPageProps) {
-  const { goHome } = useAppStore();
+  const router = useRouter();
   const [sort, setSort] = useState<SortOption>("newest");
 
   const category = getCategoryBySlug(slug);
@@ -43,18 +43,16 @@ export function StorefrontCategory({ slug }: CategoryPageProps) {
       <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <Package className="mx-auto h-12 w-12 text-muted-foreground" />
         <h1 className="mt-4 text-2xl font-bold">Category not found</h1>
-        <Button onClick={goHome} className="mt-4">Back to home</Button>
+        <Button onClick={() => router.push("/")} className="mt-4">Back to home</Button>
       </div>
     );
   }
-
-  const emoji = category.iconUrl?.match(/text=([^&]+)/)?.[1] ?? "📦";
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Breadcrumbs */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-        <button onClick={goHome} className="flex items-center gap-1 hover:text-primary">
+        <button onClick={() => router.push("/")} className="flex items-center gap-1 hover:text-primary">
           <Home className="h-3.5 w-3.5" /> Home
         </button>
         <ChevronRight className="h-3.5 w-3.5" />
@@ -64,8 +62,8 @@ export function StorefrontCategory({ slug }: CategoryPageProps) {
       {/* Category header */}
       <div className="mb-6 flex flex-col gap-4 overflow-hidden rounded-xl border bg-gradient-to-r from-accent/40 to-accent/10 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-card text-4xl shadow-sm">
-            {emoji}
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-card shadow-sm">
+            <Tag className="h-8 w-8 text-muted-foreground" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-foreground sm:text-3xl">{category.name}</h1>

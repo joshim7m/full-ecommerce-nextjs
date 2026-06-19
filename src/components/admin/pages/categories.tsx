@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
-  Plus, Search, MoreHorizontal, Edit, Trash2, Eye, Tag, Save, X,
+  Plus, Search, MoreHorizontal, Edit, Trash2, Eye, Tag, Save, X, RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent } from "@/components/ui/card";
-import { CATEGORIES, PRODUCTS } from "@/lib/mock-data";
+import { apiClient } from "@/lib/api-client";
 import { useToast } from "@/hooks/use-toast";
 import { formatDate } from "@/lib/format";
 import type { Category } from "@/lib/types";
@@ -23,11 +23,26 @@ import type { Category } from "@/lib/types";
 export function AdminCategories() {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
-  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [viewingCategory, setViewingCategory] = useState<Category | null>(null);
-  const [deleteCategory, setDeleteCategory] = useState<Category | null>(null);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+
+  const fetchCategories = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res: any = await apiClient("/categories?includeInactive=true");
+      setCategories(res.data ?? []);
+    } catch (err: any) {
+      toast({ title: "Failed to load categories", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return categories;
@@ -37,30 +52,62 @@ export function AdminCategories() {
     );
   }, [categories, search]);
 
-  function getProductCount(categoryId: string): number {
-    return PRODUCTS.filter((p) => p.categoryId === categoryId).length;
+  async function handleCreate(newCat: Category) {
+    try {
+      const res: any = await apiClient("/categories", {
+        method: "POST",
+        body: JSON.stringify({
+          name: newCat.name,
+          slug: newCat.slug,
+          description: newCat.description,
+          sortOrder: newCat.sortOrder,
+          isActive: newCat.isActive,
+        }),
+      });
+      setCategories((prev) => [...prev, res.data]);
+      setCreateOpen(false);
+      toast({ title: "Category created", description: res.data.name });
+    } catch (err: any) {
+      toast({ title: "Failed to create category", description: err.message, variant: "destructive" });
+    }
   }
 
-  function handleSave(updated: Category) {
-    setCategories((prev) => {
-      const exists = prev.some((c) => c.id === updated.id);
-      if (exists) return prev.map((c) => (c.id === updated.id ? updated : c));
-      return [...prev, updated];
-    });
-    setEditingCategory(null);
-    toast({ title: "Category saved", description: updated.name });
+  async function handleUpdate(updated: Category) {
+    try {
+      const res: any = await apiClient(`/categories/${updated.slug}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          name: updated.name,
+          description: updated.description,
+          sortOrder: updated.sortOrder,
+          isActive: updated.isActive,
+        }),
+      });
+      setCategories((prev) => prev.map((c) => (c.id === res.data.id ? res.data : c)));
+      setEditingCategory(null);
+      toast({ title: "Category saved", description: res.data.name });
+    } catch (err: any) {
+      toast({ title: "Failed to update category", description: err.message, variant: "destructive" });
+    }
   }
 
-  function handleCreate(newCat: Category) {
-    setCategories((prev) => [...prev, newCat]);
-    setCreateOpen(false);
-    toast({ title: "Category created", description: newCat.name });
+  async function handleDelete(cat: Category) {
+    try {
+      await apiClient(`/categories/${cat.slug}`, { method: "DELETE" });
+      setCategories((prev) => prev.filter((c) => c.id !== cat.id));
+      setDeletingCategory(null);
+      toast({ title: "Category deleted", description: cat.name, variant: "destructive" });
+    } catch (err: any) {
+      toast({ title: "Failed to delete category", description: err.message, variant: "destructive" });
+    }
   }
 
-  function handleDelete(cat: Category) {
-    setCategories((prev) => prev.filter((c) => c.id !== cat.id));
-    setDeleteCategory(null);
-    toast({ title: "Category deleted", description: cat.name, variant: "destructive" });
+  if (loading) {
+    return (
+      <div className="flex min-h-[400px] items-center justify-center">
+        <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   return (
@@ -113,14 +160,15 @@ export function AdminCategories() {
                   </TableRow>
                 ) : (
                   filtered.map((cat, idx) => {
-                    const emoji = cat.iconUrl?.match(/text=([^&]+)/)?.[1] ?? "📦";
-                    const count = getProductCount(cat.id);
+                    const count = cat.productCount ?? 0;
                     return (
                       <TableRow key={cat.id} className="hover:bg-muted/30">
                         <TableCell className="font-mono text-xs text-muted-foreground">{idx + 1}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-xl">{emoji}</div>
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                              <Tag className="h-5 w-5 text-muted-foreground" />
+                            </div>
                             <div>
                               <div className="text-sm font-medium text-foreground">{cat.name}</div>
                               <div className="line-clamp-1 text-xs text-muted-foreground">{cat.description}</div>
@@ -153,7 +201,7 @@ export function AdminCategories() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-destructive focus:text-destructive"
-                                onClick={() => setDeleteCategory(cat)}
+                                onClick={() => setDeletingCategory(cat)}
                                 disabled={count > 0}
                               >
                                 <Trash2 className="mr-2 h-4 w-4" /> Delete {count > 0 && "(has products)"}
@@ -171,7 +219,7 @@ export function AdminCategories() {
         </CardContent>
       </Card>
 
-      {/* Modals */}
+      {/* Create */}
       {createOpen && (
         <CategoryFormDialog
           key={`create-${createOpen}`}
@@ -181,13 +229,15 @@ export function AdminCategories() {
           mode="create"
         />
       )}
+
+      {/* Edit */}
       {editingCategory && (
         <CategoryFormDialog
           key={`edit-${editingCategory.id}`}
           open={!!editingCategory}
           onOpenChange={(open) => !open && setEditingCategory(null)}
           category={editingCategory}
-          onSave={handleSave}
+          onSave={handleUpdate}
           mode="edit"
         />
       )}
@@ -201,8 +251,8 @@ export function AdminCategories() {
           {viewingCategory && (
             <div className="space-y-3">
               <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-accent text-3xl">
-                  {viewingCategory.iconUrl?.match(/text=([^&]+)/)?.[1] ?? "📦"}
+                <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-accent">
+                  <Tag className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <div>
                   <h3 className="text-lg font-bold">{viewingCategory.name}</h3>
@@ -213,7 +263,7 @@ export function AdminCategories() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="rounded-lg border bg-muted/20 p-2.5">
                   <div className="text-[10px] font-semibold uppercase text-muted-foreground">Products</div>
-                  <div className="font-mono text-lg font-bold">{getProductCount(viewingCategory.id)}</div>
+                  <div className="font-mono text-lg font-bold">{viewingCategory.productCount ?? 0}</div>
                 </div>
                 <div className="rounded-lg border bg-muted/20 p-2.5">
                   <div className="text-[10px] font-semibold uppercase text-muted-foreground">Sort order</div>
@@ -226,19 +276,19 @@ export function AdminCategories() {
       </Dialog>
 
       {/* Delete */}
-      <AlertDialog open={!!deleteCategory} onOpenChange={(open) => !open && setDeleteCategory(null)}>
+      <AlertDialog open={!!deletingCategory} onOpenChange={(open) => !open && setDeletingCategory(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Category?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <span className="font-semibold text-foreground">{deleteCategory?.name}</span>?
+              Are you sure you want to delete <span className="font-semibold text-foreground">{deletingCategory?.name}</span>?
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => deleteCategory && handleDelete(deleteCategory)}
+              onClick={() => deletingCategory && handleDelete(deletingCategory)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               <Trash2 className="mr-2 h-4 w-4" /> Delete
@@ -271,7 +321,6 @@ function CategoryFormDialog({ open, onOpenChange, category, onSave, mode }: Cate
   const [description, setDescription] = useState(category?.description ?? "");
   const [sortOrder, setSortOrder] = useState(String(category?.sortOrder ?? 0));
   const [isActive, setIsActive] = useState(category?.isActive ?? true);
-  const [emoji, setEmoji] = useState(category?.iconUrl?.match(/text=([^&]+)/)?.[1] ?? "📦");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -279,21 +328,15 @@ function CategoryFormDialog({ open, onOpenChange, category, onSave, mode }: Cate
       toast({ title: "Missing required fields", description: "Name and slug are required.", variant: "destructive" });
       return;
     }
-    const newCategory: Category = {
+    const newCategory: Partial<Category> & Pick<Category, "name" | "slug"> = {
       id: category?.id ?? `cat_${Date.now()}`,
       slug,
       name,
       description: description || null,
-      imageUrl: category?.imageUrl ?? `https://placehold.co/1200x800/FDE68A/7C2D12?text=${encodeURIComponent(name)}`,
-      iconUrl: `https://placehold.co/200x200/FDE68A/7C2D12?text=${encodeURIComponent(emoji)}`,
       sortOrder: Number(sortOrder) || 0,
       isActive,
-      parentId: null,
-      productCount: category?.productCount ?? 0,
-      createdAt: category?.createdAt ?? new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
-    onSave(newCategory);
+    onSave(newCategory as Category);
   }
 
   function generateSlug() {
@@ -323,15 +366,9 @@ function CategoryFormDialog({ open, onOpenChange, category, onSave, mode }: Cate
             <Label htmlFor="c-desc">Description</Label>
             <Textarea id="c-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Category description..." className="min-h-[80px]" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-1.5">
-              <Label htmlFor="c-emoji">Icon (emoji)</Label>
-              <Input id="c-emoji" value={emoji} onChange={(e) => setEmoji(e.target.value)} placeholder="🍼" maxLength={4} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="c-sort">Sort order</Label>
-              <Input id="c-sort" type="number" min="0" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} />
-            </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="c-sort">Sort order</Label>
+            <Input id="c-sort" type="number" min="0" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} />
           </div>
           <div className="flex items-center justify-between rounded-lg border p-3">
             <div>

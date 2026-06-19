@@ -39,7 +39,7 @@ const SECURITY_HEADERS = [
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https: blob:",
       "media-src 'self' https:",
-      "connect-src 'self' https:",
+      "connect-src 'self' http://localhost:4000 https:",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",

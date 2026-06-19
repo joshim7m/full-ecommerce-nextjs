@@ -1,10 +1,10 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { ShoppingCart, Star, Sparkles, TrendingUp, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/lib/store/cart-store";
-import { useAppStore } from "@/lib/store/app-store";
 import { formatBdt, calculateDiscountPercent } from "@/lib/format";
 import type { Product } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
@@ -14,8 +14,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
-  const goProduct = useAppStore((s) => s.goProduct);
   const { toast } = useToast();
 
   const discount = calculateDiscountPercent(product.priceBdt, product.compareAtBdt);
@@ -32,7 +32,7 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   function handleCardClick() {
-    goProduct(product.slug);
+    router.push(`/product/${product.slug}`);
   }
 
   return (

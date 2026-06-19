@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Home, ChevronRight, ShoppingBag, User, Phone, MapPin, StickyNote,
   Truck, ShieldCheck, ArrowLeft, Check, CreditCard, Wallet,
@@ -13,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useCartStore } from "@/lib/store/cart-store";
-import { useAppStore } from "@/lib/store/app-store";
 import { useToast } from "@/hooks/use-toast";
 import { formatBdt, generateOrderNumber } from "@/lib/format";
 import type { PaymentMethod } from "@/lib/types";
@@ -26,8 +26,8 @@ const PAYMENT_METHODS: Array<{ value: PaymentMethod; label: string; description:
 ];
 
 export function StorefrontCheckout() {
+  const router = useRouter();
   const { items, getSubtotalBdt, getShippingBdt, getTotalBdt, clearCart } = useCartStore();
-  const { goHome, goOrderSuccess } = useAppStore();
   const { toast } = useToast();
 
   const [fullName, setFullName] = useState("");
@@ -47,7 +47,6 @@ export function StorefrontCheckout() {
     if (!fullName.trim() || fullName.trim().length < 2) {
       next.fullName = "Please enter your full name (min 2 characters)";
     }
-    // Bangladeshi mobile: 01XXXXXXXXX or +8801XXXXXXXXX
     const phone = mobile.replace(/[\s-]/g, "");
     if (!/^(\+?880|0)?1[3-9][0-9]{8}$/.test(phone)) {
       next.mobile = "Enter a valid Bangladeshi mobile (e.g. 017XXXXXXXX)";
@@ -78,12 +77,11 @@ export function StorefrontCheckout() {
       return;
     }
     setSubmitting(true);
-    // Simulate order creation
     setTimeout(() => {
       const orderNumber = generateOrderNumber();
       clearCart();
       setSubmitting(false);
-      goOrderSuccess(orderNumber);
+      router.push(`/order-success?orderNumber=${encodeURIComponent(orderNumber)}`);
     }, 900);
   }
 
@@ -97,7 +95,7 @@ export function StorefrontCheckout() {
         <p className="mt-1 text-sm text-muted-foreground">
           Add some products to your cart before proceeding to checkout.
         </p>
-        <Button onClick={goHome} className="mt-4 gap-2">
+        <Button onClick={() => router.push("/")} className="mt-4 gap-2">
           <ArrowLeft className="h-4 w-4" /> Continue Shopping
         </Button>
       </div>
@@ -108,7 +106,7 @@ export function StorefrontCheckout() {
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Breadcrumbs */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-        <button onClick={goHome} className="flex items-center gap-1 hover:text-primary">
+        <button onClick={() => router.push("/")} className="flex items-center gap-1 hover:text-primary">
           <Home className="h-3.5 w-3.5" /> Home
         </button>
         <ChevronRight className="h-3.5 w-3.5" />
@@ -118,9 +116,9 @@ export function StorefrontCheckout() {
       <h1 className="mb-6 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Checkout</h1>
 
       <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[1fr_400px]">
-        {/* ============================================== LEFT: Form */}
+        {/* LEFT: Form */}
         <div className="space-y-6">
-          {/* Delivery details card — 4 fields only */}
+          {/* Delivery details card */}
           <div className="rounded-xl border bg-card p-5 sm:p-6">
             <div className="mb-4 flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -134,7 +132,6 @@ export function StorefrontCheckout() {
             </p>
 
             <div className="grid gap-4">
-              {/* 1. Full Name */}
               <div className="grid gap-1.5">
                 <Label htmlFor="fullName" className="flex items-center gap-1.5 text-sm font-medium">
                   <User className="h-3.5 w-3.5 text-muted-foreground" />
@@ -151,7 +148,6 @@ export function StorefrontCheckout() {
                 {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
               </div>
 
-              {/* 2. Mobile Number */}
               <div className="grid gap-1.5">
                 <Label htmlFor="mobile" className="flex items-center gap-1.5 text-sm font-medium">
                   <Phone className="h-3.5 w-3.5 text-muted-foreground" />
@@ -172,7 +168,6 @@ export function StorefrontCheckout() {
                 </p>
               </div>
 
-              {/* 3. Delivery Address */}
               <div className="grid gap-1.5">
                 <Label htmlFor="address" className="flex items-center gap-1.5 text-sm font-medium">
                   <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
@@ -197,7 +192,6 @@ export function StorefrontCheckout() {
                 ) : null}
               </div>
 
-              {/* 4. Note / Special Instructions */}
               <div className="grid gap-1.5">
                 <Label htmlFor="note" className="flex items-center gap-1.5 text-sm font-medium">
                   <StickyNote className="h-3.5 w-3.5 text-muted-foreground" />
@@ -247,12 +241,11 @@ export function StorefrontCheckout() {
           </div>
         </div>
 
-        {/* ============================================== RIGHT: Summary */}
+        {/* RIGHT: Summary */}
         <div className="lg:sticky lg:top-32 lg:self-start">
           <div className="rounded-xl border bg-card p-5 sm:p-6">
             <h2 className="mb-4 text-base font-semibold">Order Summary</h2>
 
-            {/* Items */}
             <div className="max-h-72 space-y-3 overflow-y-auto pr-1">
               {items.map((item) => (
                 <div key={item.productId} className="flex gap-3">
@@ -276,7 +269,6 @@ export function StorefrontCheckout() {
 
             <Separator className="my-4" />
 
-            {/* Totals */}
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Subtotal ({items.length} items)</span>

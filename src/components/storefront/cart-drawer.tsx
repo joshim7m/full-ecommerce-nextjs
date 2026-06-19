@@ -1,147 +1,105 @@
 "use client";
 
-import { Minus, Plus, Trash2, ShoppingBag, X, ArrowRight, Truck } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ShoppingCart, X, Plus, Minus, Trash2, BaggageClaim } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCartStore } from "@/lib/store/cart-store";
-import { useAppStore } from "@/lib/store/app-store";
 import { formatBdt } from "@/lib/format";
 
 export function CartDrawer() {
-  const {
-    items,
-    isOpen,
-    closeCart,
-    removeItem,
-    updateQuantity,
-    getSubtotalBdt,
-    getShippingBdt,
-    getTotalBdt,
-    clearCart,
-  } = useCartStore();
-  const { goCheckout, goProduct } = useAppStore();
+  const router = useRouter();
+  const { items, isOpen, openCart, closeCart, updateQuantity, removeItem, clearCart } = useCartStore();
 
-  const subtotal = getSubtotalBdt();
-  const shipping = getShippingBdt();
-  const total = getTotalBdt();
-  const totalItems = items.reduce((s, i) => s + i.quantity, 0);
+  const subtotal = items.reduce((sum, i) => sum + i.product.priceBdt * i.quantity, 0);
+  const shipping = subtotal >= 1500 ? 0 : 60;
 
   function handleCheckout() {
     closeCart();
-    goCheckout();
+    router.push("/checkout");
+  }
+
+  function handleProductClick(slug: string) {
+    closeCart();
+    router.push(`/product/${slug}`);
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
-      <SheetContent className="flex w-full flex-col p-0 sm:max-w-md">
-        <SheetHeader className="border-b bg-gradient-to-r from-accent/60 to-accent/20 px-5 py-4">
-          <SheetTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
-              <ShoppingBag className="h-5 w-5 text-primary" />
-              Your Cart
-              {totalItems > 0 && (
-                <Badge variant="secondary" className="font-mono text-xs">
-                  {totalItems} item{totalItems !== 1 ? "s" : ""}
-                </Badge>
-              )}
-            </span>
+    <Sheet open={isOpen} onOpenChange={(open) => (open ? openCart() : closeCart())}>
+      <SheetContent className="flex w-full flex-col sm:max-w-lg">
+        <SheetHeader className="border-b pb-4">
+          <SheetTitle className="flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" />
+            Cart ({items.length})
           </SheetTitle>
         </SheetHeader>
 
         {items.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-12 text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-accent">
-              <ShoppingBag className="h-10 w-10 text-muted-foreground" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-foreground">Your cart is empty</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Browse our categories and add items to get started.
-              </p>
-            </div>
-            <Button onClick={closeCart} variant="outline">
-              Continue shopping
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12">
+            <BaggageClaim className="h-16 w-16 text-muted-foreground/40" />
+            <p className="text-sm font-medium text-muted-foreground">Your cart is empty</p>
+            <Button variant="outline" size="sm" onClick={closeCart}>
+              Continue Shopping
             </Button>
           </div>
         ) : (
           <>
-            {/* Items list */}
-            <div className="flex-1 overflow-y-auto px-3 py-2">
-              {items.map((item) => {
-                const product = item.product;
-                const lineTotal = product.priceBdt * item.quantity;
-                return (
-                  <div
-                    key={item.productId}
-                    className="flex gap-3 rounded-lg p-2 transition-colors hover:bg-accent/40"
-                  >
+            <ScrollArea className="flex-1 pr-4">
+              <div className="space-y-4 py-4">
+                {items.map((item) => (
+                  <div key={item.product.id} className="flex gap-3">
                     <button
-                      onClick={() => {
-                        closeCart();
-                        goProduct(product.slug);
-                      }}
-                      className="shrink-0"
+                      onClick={() => handleProductClick(item.product.slug)}
+                      className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border"
                     >
                       <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="h-20 w-20 rounded-lg border object-cover"
+                        src={item.product.images[0]}
+                        alt={item.product.name}
+                        className="h-full w-full object-cover"
                         loading="lazy"
                       />
                     </button>
-                    <div className="flex min-w-0 flex-1 flex-col">
-                      <button
-                        onClick={() => {
-                          closeCart();
-                          goProduct(product.slug);
-                        }}
-                        className="text-left text-sm font-medium leading-snug text-foreground line-clamp-2 hover:text-primary"
-                      >
-                        {product.name}
-                      </button>
-                      <div className="text-xs text-muted-foreground">{product.categoryName}</div>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="font-mono text-sm font-bold text-primary">
-                          {formatBdt(product.priceBdt)}
-                        </span>
-                        {product.compareAtBdt && (
-                          <span className="font-mono text-xs text-muted-foreground line-through">
-                            {formatBdt(product.compareAtBdt)}
-                          </span>
-                        )}
+                    <div className="flex min-w-0 flex-1 flex-col justify-between">
+                      <div>
+                        <button
+                          onClick={() => handleProductClick(item.product.slug)}
+                          className="line-clamp-1 text-sm font-medium text-foreground hover:text-primary"
+                        >
+                          {item.product.name}
+                        </button>
+                        <p className="text-xs text-muted-foreground">{item.product.categoryName}</p>
                       </div>
-                      <div className="mt-auto flex items-center justify-between pt-2">
-                        {/* Quantity stepper */}
-                        <div className="flex items-center rounded-md border">
-                          <button
-                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
-                            className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground"
-                            aria-label="Decrease quantity"
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
                           >
                             <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-8 text-center font-mono text-xs font-semibold">
-                            {item.quantity}
-                          </span>
-                          <button
-                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
-                            disabled={item.quantity >= product.stock}
-                            className="flex h-7 w-7 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40"
-                            aria-label="Increase quantity"
+                          </Button>
+                          <span className="w-8 text-center text-sm font-medium tabular-nums">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />
-                          </button>
+                          </Button>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-sm font-semibold">
-                            {formatBdt(lineTotal)}
+                          <span className="font-mono text-sm font-bold text-primary">
+                            {formatBdt(item.product.priceBdt * item.quantity)}
                           </span>
                           <button
-                            onClick={() => removeItem(item.productId)}
+                            onClick={() => removeItem(item.product.id)}
                             className="text-muted-foreground hover:text-destructive"
-                            aria-label={`Remove ${product.name} from cart`}
+                            aria-label={`Remove ${item.product.name}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -149,51 +107,51 @@ export function CartDrawer() {
                       </div>
                     </div>
                   </div>
-                );
-              })}
+                ))}
+              </div>
+            </ScrollArea>
 
-              {/* Clear cart */}
-              <button
-                onClick={clearCart}
-                className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed py-2 text-xs font-medium text-muted-foreground hover:border-destructive hover:text-destructive"
-              >
-                <X className="h-3 w-3" />
-                Clear cart
-              </button>
-            </div>
-
-            {/* Footer with totals + checkout */}
-            <SheetFooter className="border-t bg-muted/30 px-5 py-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
+            <div className="border-t pt-4">
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="font-mono font-medium">{formatBdt(subtotal)}</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-1 text-muted-foreground">
-                    <Truck className="h-3.5 w-3.5" />
-                    Shipping
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="font-mono font-medium">
+                    {shipping === 0 ? (
+                      <span className="text-emerald-600">FREE</span>
+                    ) : (
+                      formatBdt(shipping)
+                    )}
                   </span>
-                  <span className="font-mono font-medium">{formatBdt(shipping)}</span>
                 </div>
                 <Separator className="my-2" />
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">Total</span>
-                  <span className="font-mono text-lg font-bold text-primary">{formatBdt(total)}</span>
+                <div className="flex justify-between text-base font-bold">
+                  <span>Total</span>
+                  <span className="font-mono">{formatBdt(subtotal + shipping)}</span>
                 </div>
-                <div className="rounded-md bg-accent/60 px-3 py-1.5 text-center text-xs text-muted-foreground">
-                  Cash on Delivery available · Inside Dhaka ৳60, outside ৳120
-                </div>
+                {subtotal < 1500 && subtotal > 0 && (
+                  <p className="text-[10px] text-muted-foreground">
+                    Add {formatBdt(1500 - subtotal)} more for free shipping
+                  </p>
+                )}
               </div>
-              <Button
-                onClick={handleCheckout}
-                size="lg"
-                className="mt-3 w-full gap-2 text-base"
-              >
-                Proceed to Checkout
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </SheetFooter>
+              <div className="mt-4 flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearCart}
+                  className="gap-1"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Clear
+                </Button>
+                <Button size="sm" className="flex-1 gap-2" onClick={handleCheckout}>
+                  <BaggageClaim className="h-4 w-4" /> Checkout
+                </Button>
+              </div>
+            </div>
           </>
         )}
       </SheetContent>

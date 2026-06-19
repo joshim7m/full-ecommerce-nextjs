@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Home, ChevronRight, ShoppingCart, Heart, Share2, Truck, ShieldCheck, RefreshCw,
   Check, Minus, Plus, Star, Sparkles, TrendingUp, Package, ChevronLeft,
@@ -11,17 +12,21 @@ import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "../product-card";
 import { getProductBySlug, getRelatedProducts, getCategoryBySlug } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store/app-store";
 import { useCartStore } from "@/lib/store/cart-store";
 import { useToast } from "@/hooks/use-toast";
 import { formatBdt, calculateDiscountPercent } from "@/lib/format";
+import { CATEGORIES } from "@/lib/mock-data";
+
+const CATEGORIES_LOOKUP: Record<string, (typeof CATEGORIES)[number]> = Object.fromEntries(
+  CATEGORIES.map((c) => [c.id, c]),
+);
 
 interface ProductDetailProps {
   slug: string;
 }
 
 export function StorefrontProduct({ slug }: ProductDetailProps) {
-  const { goHome, goCategory } = useAppStore();
+  const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
   const { toast } = useToast();
 
@@ -36,12 +41,12 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
       <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
         <Package className="mx-auto h-12 w-12 text-muted-foreground" />
         <h1 className="mt-4 text-2xl font-bold">Product not found</h1>
-        <Button onClick={goHome} className="mt-4">Back to home</Button>
+        <Button onClick={() => router.push("/")} className="mt-4">Back to home</Button>
       </div>
     );
   }
 
-  const category = getCategoryBySlug(product.categorySlug || "") || product.categoryId ? CATEGORIES_LOOKUP[product.categoryId] : null;
+  const category = getCategoryBySlug(product.categorySlug || "") || CATEGORIES_LOOKUP[product.categoryId] || null;
   const related = getRelatedProducts(slug);
   const discount = calculateDiscountPercent(product.priceBdt, product.compareAtBdt);
   const outOfStock = product.stock === 0;
@@ -58,20 +63,19 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
   function handleBuyNow() {
     if (outOfStock) return;
     addItem(product!, quantity);
-    // The cart drawer auto-opens on addItem
   }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       {/* Breadcrumbs */}
       <nav className="mb-4 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
-        <button onClick={goHome} className="flex items-center gap-1 hover:text-primary">
+        <button onClick={() => router.push("/")} className="flex items-center gap-1 hover:text-primary">
           <Home className="h-3.5 w-3.5" /> Home
         </button>
         <ChevronRight className="h-3.5 w-3.5" />
         {category && (
           <>
-            <button onClick={() => goCategory(category.slug)} className="hover:text-primary">
+            <button onClick={() => router.push(`/category/${category.slug}`)} className="hover:text-primary">
               {category.name}
             </button>
             <ChevronRight className="h-3.5 w-3.5" />
@@ -81,7 +85,7 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
       </nav>
 
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* ====================================================== GALLERY */}
+        {/* GALLERY */}
         <div>
           <div className="relative aspect-square overflow-hidden rounded-xl border bg-muted/30">
             <img
@@ -106,7 +110,6 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
                 </Badge>
               )}
             </div>
-            {/* Image nav arrows */}
             {product.images.length > 1 && (
               <>
                 <button
@@ -126,7 +129,6 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
               </>
             )}
           </div>
-          {/* Thumbnails */}
           {product.images.length > 1 && (
             <div className="mt-3 flex gap-2">
               {product.images.map((img, i) => (
@@ -144,7 +146,7 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
           )}
         </div>
 
-        {/* ====================================================== INFO */}
+        {/* INFO */}
         <div>
           <div className="text-xs font-medium uppercase tracking-wider text-primary">
             {product.categoryName}
@@ -153,7 +155,6 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
             {product.name}
           </h1>
 
-          {/* Rating + stock */}
           <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
             <div className="flex items-center gap-1">
               <div className="flex">
@@ -185,14 +186,12 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
             )}
           </div>
 
-          {/* Short description */}
           {product.shortDescription && (
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               {product.shortDescription}
             </p>
           )}
 
-          {/* Price */}
           <div className="mt-5 flex items-end gap-3">
             <span className="font-mono text-3xl font-bold text-primary">
               {formatBdt(product.priceBdt)}
@@ -214,7 +213,6 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
 
           <Separator className="my-5" />
 
-          {/* Quantity + Add to cart */}
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center rounded-lg border">
               <button
@@ -283,7 +281,6 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
             </Button>
           </div>
 
-          {/* Trust badges */}
           <div className="mt-6 grid grid-cols-3 gap-3 rounded-lg border bg-muted/20 p-4 text-center">
             <div className="flex flex-col items-center gap-1.5">
               <Truck className="h-5 w-5 text-primary" />
@@ -304,7 +301,7 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
         </div>
       </div>
 
-      {/* ====================================================== DETAILS TABS */}
+      {/* DETAILS TABS */}
       <div className="mt-12">
         <Tabs defaultValue="description">
           <TabsList className="w-full justify-start border-b">
@@ -349,7 +346,7 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
         </Tabs>
       </div>
 
-      {/* ====================================================== RELATED */}
+      {/* RELATED */}
       {related.length > 0 && (
         <div className="mt-12">
           <h2 className="mb-5 text-xl font-bold tracking-tight text-foreground">You may also like</h2>
@@ -363,9 +360,3 @@ export function StorefrontProduct({ slug }: ProductDetailProps) {
     </div>
   );
 }
-
-// Quick lookup map for category by id
-import { CATEGORIES } from "@/lib/mock-data";
-const CATEGORIES_LOOKUP: Record<string, typeof CATEGORIES[number]> = Object.fromEntries(
-  CATEGORIES.map((c) => [c.id, c]),
-);

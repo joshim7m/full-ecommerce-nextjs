@@ -63,6 +63,7 @@ export const SITE_CONFIG = {
 interface ProductSchemaInput {
   slug: string;
   name: string;
+  shortDescription?: string | null;
   description: string;
   priceBdt: number;
   compareAtBdt?: number | null;
@@ -464,7 +465,7 @@ export function buildProductMetadata(input: ProductSchemaInput): Metadata {
       },
     },
     openGraph: {
-      type: "product",
+      type: "website" as const,
       locale: SITE_CONFIG.locale,
       url,
       siteName: SITE_CONFIG.name,
@@ -476,16 +477,7 @@ export function buildProductMetadata(input: ProductSchemaInput): Metadata {
         height: 800,
         alt: title,
       })),
-      product: {
-        price: input.priceBdt,
-        currency: input.currency ?? SITE_CONFIG.currency,
-        availability:
-          input.status === "OUT_OF_STOCK" || input.stock === 0
-            ? "oos"
-            : "instock",
-        condition: "new",
-      },
-    },
+    } as any,
     twitter: {
       card: "summary_large_image",
       site: SITE_CONFIG.social.twitter,

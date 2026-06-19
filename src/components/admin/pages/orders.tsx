@@ -415,7 +415,7 @@ function StatusUpdateDialog({ order, onOpenChange, onUpdate }: StatusUpdateDialo
       return;
     }
     // Find the original order to revert status — for simplicity, we pass the order with targetStatus set
-    onUpdate(order, targetStatus, trackingNumber.trim() || undefined, courierName.trim() || undefined);
+    onUpdate(order!, targetStatus, trackingNumber.trim() || undefined, courierName.trim() || undefined);
   }
 
   return (

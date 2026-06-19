@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ShoppingCart, Menu, X, Baby, Heart, User, ChevronRight, Sparkles, LayoutDashboard, Tag } from "lucide-react";
+import { Search, ShoppingCart, Menu, X, Baby, Heart, User, ChevronRight, Sparkles, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -137,12 +137,12 @@ export function StorefrontHeader() {
               ))}
               <div className="mt-3 border-t pt-3">
                 <Link
-                  href="/admin/login"
+                  href="/login"
                   className="flex w-full items-center justify-between rounded-lg bg-accent px-3 py-2.5 text-left text-sm font-medium hover:bg-accent/80"
                 >
                   <span className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    Admin Dashboard
+                    Sign In
                   </span>
                   <ChevronRight className="h-4 w-4" />
                 </Link>
@@ -261,7 +261,7 @@ export function StorefrontHeader() {
             aria-label="Account"
             asChild
           >
-            <Link href="/admin/login">
+            <Link href="/login">
               <User className="h-5 w-5" />
             </Link>
           </Button>
@@ -278,17 +278,6 @@ export function StorefrontHeader() {
                 {totalItems}
               </Badge>
             )}
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="hidden lg:inline-flex"
-            aria-label="Admin dashboard"
-            asChild
-          >
-            <Link href="/admin/dashboard">
-              <LayoutDashboard className="h-5 w-5" />
-            </Link>
           </Button>
         </div>
       </div>

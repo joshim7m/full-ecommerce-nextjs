@@ -13,7 +13,12 @@ import type { Category, Product, Order, User, OrderStatus } from "./types";
 // -----------------------------------------------------------------------------
 
 function placeholderImage(text: string, w = 800, h = 800, bg = "FDE68A", fg = "7C2D12"): string {
-  return `https://placehold.co/${w}x${h}/${bg}/${fg}?text=${encodeURIComponent(text)}`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="#${bg}"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#${fg}" font-family="sans-serif" font-size="${Math.round(w / 20)}">${escapeXml(text)}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
+function escapeXml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 function daysAgo(n: number): string {
@@ -396,10 +401,36 @@ const PRODUCT_SEEDS: ProductSeed[] = [
   },
 ];
 
+// Map mock-data slugs to real backend image paths
+const API = "http://localhost:4000";
+const IMG_MAP: Record<string, string> = {
+  "mumlove-glass-feeding-bottle": `${API}/images/products/mumlove-glass-feeding-bottle.webp`,
+  "applebear-wide-neck-pp-bottle": `${API}/images/products/applebear-wide-neck-pp-bottle.webp`,
+  "philips-avent-natural-response-260ml": `${API}/images/products/philips-avent-260ml-bottle.webp`,
+  "philips-avent-125ml-bottle": `${API}/images/products/philips-avent-125ml-bottle.webp`,
+  "intelligent-rh228-automatic-double-breast-pump": `${API}/images/products/intelligent-rh228-double-breast-pump.webp`,
+  "only-baby-manual-breast-pump": `${API}/images/products/only-baby-manual-breast-pump.webp`,
+  "baby-smile-washable-breast-pad-4pcs": `${API}/images/products/baby-smile-washable-breast-pad.webp`,
+  "momeasy-washable-breast-pad-6pcs": `${API}/images/products/momeasy-washable-breast-pad.webp`,
+  "branded-multifunctional-crossbody-mommy-bag": `${API}/images/products/imported-multifunctional-mommy-bag.png`,
+  "portable-car-design-tiffin-box": `${API}/images/products/portable-car-design-tiffin-box.png`,
+  "multifunctional-japanese-style-lunch-box": `${API}/images/products/multifunctional-japanese-lunch-box.png`,
+  "creative-kids-double-layer-stainless-steel-lunch-box": `${API}/images/products/creative-kids-stainless-lunch-box.jpg`,
+  "creative-baby-bus-straw-water-cup": `${API}/images/products/creative-baby-bus-straw-water-cup.png`,
+  "bamboo-fiber-kids-tableware-set": `${API}/images/products/bamboo-fiber-kids-tableware-set.png`,
+  "kids-summer-short-sleeve-knitted-set": `${API}/images/products/kids-summer-short-sleeve-knitted-set.png`,
+  "imported-bubble-print-two-piece-outfit": `${API}/images/products/imported-bubble-print-two-piece-outfit.png`,
+  "strawberry-design-baby-girl-party-frock": `${API}/images/products/strawberry-design-baby-girl-party-frock.jpg`,
+  "sunflower-design-pure-cotton-frock": `${API}/images/products/sunflower-design-pure-cotton-frock.jpg`,
+  "childrens-premium-imported-hair-comb": `${API}/images/products/childrens-premium-imported-hair-comb.webp`,
+  "safe-baby-nasal-aspirator": `${API}/images/products/safe-baby-nasal-aspirator.png`,
+};
+
 // Build full Product[] from seeds
 export const PRODUCTS: Product[] = PRODUCT_SEEDS.map((p, idx) => {
   const category = CATEGORIES.find((c) => c.id === p.categoryId)!;
   const createdAt = daysAgo(20 - (idx % 20));
+  const realImg = IMG_MAP[p.slug];
   return {
     id: `prod_${idx + 1}`,
     slug: p.slug,
@@ -425,11 +456,13 @@ export const PRODUCTS: Product[] = PRODUCT_SEEDS.map((p, idx) => {
     categoryId: p.categoryId,
     categorySlug: category.slug,
     categoryName: category.name,
-    images: [
-      placeholderImage(p.name.slice(0, 20)),
-      placeholderImage(`${p.name.slice(0, 15)} side`, 800, 800, "FECACA", "7C2D12"),
-      placeholderImage(`${p.name.slice(0, 15)} pack`, 800, 800, "FEF3C7", "78350F"),
-    ],
+    images: realImg
+      ? [realImg]
+      : [
+          placeholderImage(p.name.slice(0, 20)),
+          placeholderImage(`${p.name.slice(0, 15)} side`, 800, 800, "FECACA", "7C2D12"),
+          placeholderImage(`${p.name.slice(0, 15)} pack`, 800, 800, "FEF3C7", "78350F"),
+        ],
     keyFeatures: p.keyFeatures,
     tags: p.tags,
     attributes: {},

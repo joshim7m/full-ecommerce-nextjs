@@ -1,88 +1,159 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 import { ArrowRight, Sparkles, TrendingUp, Truck, ShieldCheck, Baby, ChevronRight, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { ProductCard } from "../product-card";
 import { CATEGORIES, getFeaturedProducts, getBestSellers, PRODUCTS } from "@/lib/mock-data";
 
+const HERO_SLIDES = [
+  {
+    badge: "Trusted by 10,000+ Bangladeshi parents",
+    title: "Everything your baby needs,",
+    titleAccent: "delivered with love.",
+    description: "From Philips Avent bottles to hospital-grade breast pumps and adorable party frocks — shop premium baby essentials at honest prices.",
+    ctaLabel: "Shop Now",
+    ctaSlug: CATEGORIES[0]?.slug ?? "feeding-nursing",
+    ctaSecondary: "Browse Clothing",
+    ctaSecondarySlug: CATEGORIES[3]?.slug ?? "fashion-clothing",
+    imageSrc: () => getFeaturedProducts()[0]?.images[0],
+    imageAlt: "Featured product",
+  },
+  {
+    badge: "New arrivals every week",
+    title: "Dress your little star",
+    titleAccent: "in style & comfort.",
+    description: "Adorable party frocks, summer knitted sets, and pure cotton outfits — all designed for your baby's delicate skin.",
+    ctaLabel: "Shop Fashion",
+    ctaSlug: "fashion-clothing",
+    ctaSecondary: "View Featured",
+    ctaSecondarySlug: CATEGORIES[0]?.slug ?? "feeding-nursing",
+    imageSrc: () => getBestSellers()[3]?.images[0],
+    imageAlt: "Baby fashion",
+  },
+  {
+    badge: "Mommy & baby care",
+    title: "Everything for",
+    titleAccent: "happy feeding times.",
+    description: "Hospital-grade breast pumps, anti-colic bottles, washable nursing pads, and more — make every feeding moment a joy.",
+    ctaLabel: "Shop Feeding",
+    ctaSlug: "feeding-nursing",
+    ctaSecondary: "Mom Care",
+    ctaSecondarySlug: "mom-care-maternity",
+    imageSrc: () => getFeaturedProducts()[2]?.images[0],
+    imageAlt: "Feeding essentials",
+  },
+  {
+    badge: "Safe & fun dining",
+    title: "Mealtime made",
+    titleAccent: "colorful & exciting.",
+    description: "Bamboo fiber tableware sets, stainless lunch boxes, and fun straw cups — designed to make every meal an adventure.",
+    ctaLabel: "Shop Dining",
+    ctaSlug: "feeding-nursing",
+    ctaSecondary: "Explore All",
+    ctaSecondarySlug: CATEGORIES[0]?.slug ?? "feeding-nursing",
+    imageSrc: () => getBestSellers()[4]?.images[0],
+    imageAlt: "Kids dining",
+  },
+];
+
 export function StorefrontHome() {
   const router = useRouter();
+  const [api, setApi] = useState<CarouselApi | null>(null);
+  const [current, setCurrent] = useState(0);
   const featured = getFeaturedProducts();
   const bestSellers = getBestSellers();
   const newArrivals = PRODUCTS.slice().reverse().slice(0, 10);
 
+  const onSelect = useCallback((a: CarouselApi) => {
+    setCurrent(a?.selectedScrollSnap() ?? 0);
+  }, []);
+
+  useEffect(() => {
+    if (!api) return;
+    api.on("select", onSelect);
+    const timer = setInterval(() => api.scrollNext(), 5000);
+    return () => {
+      clearInterval(timer);
+      api.off("select", onSelect);
+    };
+  }, [api, onSelect]);
+
+  useEffect(() => {
+    if (!api) return;
+    const t = setTimeout(() => setCurrent(api.selectedScrollSnap() ?? 0), 0);
+    return () => clearTimeout(t);
+  }, [api]);
+
   return (
     <div className="flex flex-col">
-      {/* HERO */}
+      {/* HERO CAROUSEL */}
       <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50">
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, oklch(0.94 0.04 75) 0, transparent 40%), radial-gradient(circle at 80% 70%, oklch(0.94 0.04 25) 0, transparent 40%)" }} />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:py-20 lg:px-8">
-          <div>
-            <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10">
-              <Sparkles className="mr-1 h-3 w-3" /> Trusted by 10,000+ Bangladeshi parents
-            </Badge>
-            <h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              Everything your baby needs,
-              <span className="block text-primary">delivered with love.</span>
-            </h1>
-            <p className="mt-4 max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
-              From Philips Avent bottles to hospital-grade breast pumps and adorable party frocks —
-              shop premium baby essentials at honest prices.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Button size="lg" className="gap-2" onClick={() => router.push(`/category/${CATEGORIES[0].slug}`)}>
-                Shop Now
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline" onClick={() => router.push(`/category/${CATEGORIES[3].slug}`)}>
-                Browse Clothing
-              </Button>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-5 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Truck className="h-4 w-4 text-primary" />
-                Free Dhaka delivery ৳1,500+
-              </div>
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4 text-primary" />
-                100% authentic products
-              </div>
-            </div>
+        <Carousel setApi={setApi} opts={{ loop: true, align: "start" }} className="relative">
+          <CarouselContent>
+            {HERO_SLIDES.map((slide, i) => (
+              <CarouselItem key={i}>
+                <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:py-20 lg:px-8">
+                  <div>
+                    <Badge className="mb-4 bg-primary/10 text-primary hover:bg-primary/10">
+                      <Sparkles className="mr-1 h-3 w-3" /> {slide.badge}
+                    </Badge>
+                    <h1 className="text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+                      {slide.title}
+                      <span className="block text-primary">{slide.titleAccent}</span>
+                    </h1>
+                    <p className="mt-4 max-w-md text-base leading-relaxed text-muted-foreground sm:text-lg">
+                      {slide.description}
+                    </p>
+                    <div className="mt-6 flex flex-wrap gap-3">
+                      <Button size="lg" className="gap-2" onClick={() => router.push(`/category/${slide.ctaSlug}`)}>
+                        {slide.ctaLabel}
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                      <Button size="lg" variant="outline" onClick={() => router.push(`/category/${slide.ctaSecondarySlug}`)}>
+                        {slide.ctaSecondary}
+                      </Button>
+                    </div>
+                    <div className="mt-8 flex flex-wrap gap-5 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Truck className="h-4 w-4 text-primary" />
+                        Free Dhaka delivery ৳1,500+
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        100% authentic products
+                      </div>
+                    </div>
+                  </div>
+                  <div className="relative hidden lg:flex items-center justify-center">
+                    <img
+                      src={slide.imageSrc()}
+                      alt={slide.imageAlt}
+                      className="aspect-square w-full max-w-sm rounded-2xl border object-cover shadow-lg"
+                    />
+                  </div>
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          {/* Dots */}
+          <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+            {HERO_SLIDES.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => api?.scrollTo(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === current ? "w-6 bg-primary" : "w-2 bg-primary/30 hover:bg-primary/50"
+                }`}
+              />
+            ))}
           </div>
-
-          {/* Hero image collage */}
-          <div className="relative hidden lg:block">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <img
-                  src={featured[0]?.images[0]}
-                  alt={featured[0]?.name}
-                  className="aspect-square w-full rounded-2xl border object-cover shadow-lg"
-                />
-                <img
-                  src={bestSellers[0]?.images[0]}
-                  alt={bestSellers[0]?.name}
-                  className="aspect-square w-full rounded-2xl border object-cover shadow-lg"
-                />
-              </div>
-              <div className="space-y-4 pt-8">
-                <img
-                  src={featured[1]?.images[0]}
-                  alt={featured[1]?.name}
-                  className="aspect-square w-full rounded-2xl border object-cover shadow-lg"
-                />
-                <img
-                  src={bestSellers[1]?.images[0]}
-                  alt={bestSellers[1]?.name}
-                  className="aspect-square w-full rounded-2xl border object-cover shadow-lg"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+        </Carousel>
       </section>
 
       {/* CATEGORIES */}

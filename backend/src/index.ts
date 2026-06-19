@@ -14,6 +14,7 @@ import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import RedisStore from "rate-limit-redis";
 import passport from "passport";
+import { join } from "path";
 
 import { env } from "./config/env";
 import { logger } from "./config/logger";
@@ -57,6 +58,7 @@ async function bootstrap(): Promise<void> {
     helmet({
       contentSecurityPolicy: env.isProduction,
       crossOriginEmbedderPolicy: env.isProduction,
+      crossOriginResourcePolicy: { policy: "cross-origin" },
     }),
   );
   app.use(
@@ -71,7 +73,12 @@ async function bootstrap(): Promise<void> {
   app.use(express.urlencoded({ extended: true, limit: "1mb" }));
   app.use(cookieParser());
 
-  // 5. Initialize Passport (for Google OAuth routes)
+  // 5. Serve uploaded / seeded images from the public directory
+  app.use(express.static(join(__dirname, "..", "public"), {
+    maxAge: env.isProduction ? "7d" : 0,
+  }));
+
+  // 6. Initialize Passport (for Google OAuth routes)
   app.use(passport.initialize());
 
   // 6. HTTP request logging

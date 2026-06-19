@@ -77,9 +77,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect to critical origins for performance */}
-        <link rel="preconnect" href="https://placehold.co" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://placehold.co" />
         {/* Global JSON-LD: Organization + WebSite + LocalBusiness */}
         <JsonLd
           schema={[

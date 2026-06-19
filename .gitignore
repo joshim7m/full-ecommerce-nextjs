@@ -87,6 +87,7 @@ upload/
 
 # ----- Sandbox-internal files (do not push to GitHub) -----
 .zscripts/
+/
 Caddyfile
 examples/
 mini-services/

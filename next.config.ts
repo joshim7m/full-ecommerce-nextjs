@@ -37,7 +37,7 @@ const SECURITY_HEADERS = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: https: blob:",
+      "img-src 'self' data: https: blob: http://localhost:4000",
       "media-src 'self' https:",
       "connect-src 'self' http://localhost:4000 https:",
       "frame-ancestors 'none'",
@@ -70,7 +70,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     // Allow placeholder.co images in the demo
     remotePatterns: [
-      { protocol: "https", hostname: "placehold.co" },
+      { protocol: "http", hostname: "localhost", port: "4000" },
       { protocol: "https", hostname: "babyplanet-bd.com" },
       { protocol: "https", hostname: "cdn.babyplanet-bd.com" },
     ],

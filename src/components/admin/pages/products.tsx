@@ -36,6 +36,12 @@ const PAGE_SIZE = 8;
 type SortField = "name" | "priceBdt" | "stock" | "salesCount" | "createdAt";
 type SortDir = "asc" | "desc";
 
+function placeholderSvg(text: string): string {
+  const label = text.slice(0, 15).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800"><rect width="800" height="800" fill="#FDE68A"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#7C2D12" font-family="sans-serif" font-size="40">${label}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
+
 export function AdminProducts() {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
@@ -522,7 +528,7 @@ function ProductFormDialog({ open, onOpenChange, product, onSave, mode }: Produc
       categoryId,
       categorySlug: category.slug,
       categoryName: category.name,
-      images: product?.images ?? [`https://placehold.co/800x800/FDE68A/7C2D12?text=${encodeURIComponent(name.slice(0, 15))}`],
+      images: product?.images ?? [placeholderSvg(name)],
       keyFeatures: keyFeaturesInput.split("\n").map((s) => s.trim()).filter(Boolean),
       tags: tagsInput.split(",").map((s) => s.trim()).filter(Boolean),
       attributes: product?.attributes ?? {},

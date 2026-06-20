@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Baby, ArrowLeft, Menu, Bell, Search, LayoutDashboard, Package, Tag, ShoppingCart, Users, Settings, Gauge } from "lucide-react";
+import { Baby, ArrowLeft, Menu, Bell, Search, LayoutDashboard, Package, Tag, ShoppingCart, Users, Settings, Gauge, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/lib/auth-store";
 import { ORDERS } from "@/lib/mock-data";
 import Link from "next/link";
@@ -24,19 +32,22 @@ const NAV_ITEMS = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, isLoading, user, checkAuth } = useAuthStore();
+  const { isAuthenticated, isLoading, user, checkAuth, logout } = useAuthStore();
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
     if (pathname !== "/admin/login") {
-      checkAuth();
+      checkAuth().finally(() => setAuthReady(true));
+    } else {
+      setAuthReady(true);
     }
   }, []);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated && pathname !== "/admin/login") {
+    if (authReady && !isLoading && !isAuthenticated && pathname !== "/admin/login") {
       router.push("/admin/login");
     }
-  }, [isLoading, isAuthenticated, pathname, router]);
+  }, [authReady, isLoading, isAuthenticated, pathname, router]);
 
   if (pathname === "/admin/login") {
     return <>{children}</>;
@@ -155,15 +166,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             )}
           </Button>
 
-          <div className="flex items-center gap-2 border-l pl-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {user?.name?.charAt(0)?.toUpperCase() || "A"}
-            </div>
-            <div className="hidden sm:block">
-              <div className="text-xs font-semibold">{user?.name || "Admin"}</div>
-              <div className="text-[10px] text-muted-foreground">{user?.email}</div>
-            </div>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 border-l pl-3 outline-none">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  {user?.name?.charAt(0)?.toUpperCase() || "A"}
+                </div>
+                <div className="hidden sm:block text-left">
+                  <div className="text-xs font-semibold">{user?.name || "Admin"}</div>
+                  <div className="text-[10px] text-muted-foreground">{user?.email}</div>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel>{user?.name || "Admin"}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => { logout(); router.push("/admin/login"); }}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
 
         <main className="flex-1 overflow-x-hidden p-4 sm:p-6">{children}</main>

@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,19 +8,270 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String   @id @default(cuid())
+  email            String   @unique
+  emailVerified    DateTime?
+  password         String?
+  name             String?
+  phone            String?  @unique
+  avatarUrl        String?
+  role             String   @default("USER")
+  status           String   @default("ACTIVE")
+  googleId         String?  @unique
+  refreshTokenHash String?
+  lastLoginAt      DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  orders     Order[]
+  reviews    Review[]
+  cart       Cart?
+  addresses  Address[]
+
+  @@index([role])
+  @@index([status])
+  @@index([googleId])
+  @@index([createdAt])
+  @@map("users")
 }
 
-model Post {
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  imageUrl    String?
+  iconUrl     String?
+  parentId    String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children Category[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@index([parentId])
+  @@index([slug])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("categories")
+}
+
+model Product {
+  id                   String  @id @default(cuid())
+  slug                 String  @unique
+  name                 String
+  shortDescription     String?
+  description          String?
+  pricePaisa           Int
+  compareAtPricePaisa  Int?
+  costPricePaisa       Int?
+  currency             String  @default("BDT")
+  sku                  String? @unique
+  barcode              String?
+  stock                Int     @default(0)
+  lowStockThreshold    Int     @default(5)
+  weightGrams          Int?
+  status               String  @default("DRAFT")
+  visibility           String  @default("PUBLISHED")
+  isFeatured           Boolean @default(false)
+  isBestSeller         Boolean @default(false)
+  ratingAverage        Float   @default(0)
+  ratingCount          Int     @default(0)
+  salesCount           Int     @default(0)
+  categoryId           String
+  images               String  @default("[]")
+  keyFeatures          String  @default("[]")
+  tags                 String  @default("[]")
+  attributes           String  @default("{}")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  category       Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  orderItems     OrderItem[]
+  reviews        Review[]
+  cartItems      CartItem[]
+  wishlistItems  WishlistItem[]
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+  @@index([visibility])
+  @@index([isFeatured])
+  @@index([isBestSeller])
+  @@index([sku])
+  @@index([createdAt])
+  @@index([salesCount])
+  @@index([ratingAverage])
+  @@map("products")
+}
+
+model Order {
+  id                String   @id @default(cuid())
+  orderNumber       String   @unique
+  userId            String?
+  customerName      String
+  customerPhone     String
+  customerEmail     String?
+  shippingAddress   String
+  note              String?
+  status            String   @default("PENDING")
+  paymentStatus     String   @default("UNPAID")
+  paymentMethod     String   @default("CASH_ON_DELIVERY")
+  subtotalPaisa     Int
+  shippingCostPaisa Int      @default(0)
+  discountPaisa     Int      @default(0)
+  totalPaisa        Int
+  trackingNumber    String?
+  courierName       String?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  cancelledAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([orderNumber])
+  @@index([customerPhone])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String   @id @default(cuid())
+  orderId        String
+  productId      String
+  productName    String
+  productSlug    String
+  productImage   String?
+  unitPricePaisa Int
+  quantity       Int
+  lineTotalPaisa Int
+  createdAt      DateTime @default(now())
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Cart {
   id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  userId    String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id])
+  items CartItem[]
+
+  @@index([userId])
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+  @@map("wishlist_items")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  orderId   String?
+  rating    Int
+  title     String?
+  body      String?
+  images    String   @default("[]")
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, orderId])
+  @@index([productId])
+  @@index([userId])
+  @@index([status])
+  @@index([rating])
+  @@map("reviews")
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  label      String?
+  fullName   String
+  phone      String
+  addressLine String
+  city       String
+  thana      String?
+  district   String
+  postalCode String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([district])
+  @@map("addresses")
+}
+
+model Coupon {
+  id               String    @id @default(cuid())
+  code             String    @unique
+  description      String?
+  discountType     String    @default("PERCENTAGE")
+  discountValue    Int       @default(0)
+  minOrderPaisa    Int?
+  maxDiscountPaisa Int?
+  usageLimit       Int?
+  usedCount        Int       @default(0)
+  startsAt         DateTime?
+  endsAt           DateTime?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@index([startsAt, endsAt])
+  @@map("coupons")
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { AdminOrders } from "@/components/admin/pages/orders";
+import { OrdersList } from "@/components/admin/orders/orders-list";
 
 export default function OrdersPage() {
-  return <AdminOrders />;
+  return <OrdersList />;
 }

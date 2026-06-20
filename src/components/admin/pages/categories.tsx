@@ -134,14 +134,14 @@ export function AdminCategories() {
       </Card>
 
       {/* Table */}
-      <Card>
+      <Card className="mx-auto max-w-5xl">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/40">
                   <TableHead className="w-12">#</TableHead>
-                  <TableHead>Category</TableHead>
+                  <TableHead className="max-w-xs">Category</TableHead>
                   <TableHead className="hidden md:table-cell">Slug</TableHead>
                   <TableHead>Products</TableHead>
                   <TableHead className="hidden md:table-cell">Sort Order</TableHead>
@@ -164,14 +164,14 @@ export function AdminCategories() {
                     return (
                       <TableRow key={cat.id} className="hover:bg-muted/30">
                         <TableCell className="font-mono text-xs text-muted-foreground">{idx + 1}</TableCell>
-                        <TableCell>
+                        <TableCell className="max-w-xs">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
                               <Tag className="h-5 w-5 text-muted-foreground" />
                             </div>
-                            <div>
-                              <div className="text-sm font-medium text-foreground">{cat.name}</div>
-                              <div className="line-clamp-1 text-xs text-muted-foreground">{cat.description}</div>
+                            <div className="min-w-0">
+                              <div className="truncate text-sm font-medium text-foreground">{cat.name}</div>
+                              <div className="truncate text-xs text-muted-foreground">{cat.description}</div>
                             </div>
                           </div>
                         </TableCell>

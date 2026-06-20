@@ -74,12 +74,12 @@ export function StorefrontHeader() {
 
   return (
     <header
-      className={`sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur transition-shadow ${
-        isScrolled ? "shadow-md" : ""
+      className={`sticky top-0 z-40 w-full bg-white transition-shadow ${
+        isScrolled ? "shadow-md border-b border-[#ff4d80]/20" : ""
       }`}
     >
       {/* Top announcement bar */}
-      <div className="bg-primary text-primary-foreground">
+      <div className="bg-[#ff4d80] text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-center gap-2 px-4 py-1.5 text-center text-xs sm:text-sm">
           <Sparkles className="h-3.5 w-3.5 shrink-0" />
           <span>Free delivery inside Dhaka on orders over ৳1,500 · Cash on Delivery available</span>
@@ -170,7 +170,7 @@ export function StorefrontHeader() {
         <nav className="hidden flex-1 items-center gap-1 lg:flex">
           <Link
             href="/"
-            className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+            className="rounded-md px-3 py-2 text-sm font-medium text-[#1e1b4b]/80 transition-colors hover:bg-[#ff4d80]/10 hover:text-[#ff4d80]"
           >
             Home
           </Link>
@@ -178,7 +178,7 @@ export function StorefrontHeader() {
             <Link
               key={cat.id}
               href={`/category/${cat.slug}`}
-              className="rounded-md px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+              className="rounded-md px-3 py-2 text-sm font-medium text-[#1e1b4b]/80 transition-colors hover:bg-[#ff4d80]/10 hover:text-[#ff4d80]"
             >
               {cat.name.split(" ")[0]}
             </Link>
@@ -196,7 +196,7 @@ export function StorefrontHeader() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => searchResults.length > 0 && setShowResults(true)}
-                className="h-10 rounded-full border-border bg-muted/40 pl-9 pr-4 text-sm"
+                className="h-10 rounded-full border-border bg-muted/40 pl-9 pr-4 text-sm focus-visible:border-[#ff4d80] focus-visible:ring-[#ff4d80]/20"
                 aria-label="Search products"
               />
             </div>
@@ -249,7 +249,7 @@ export function StorefrontHeader() {
           <Button
             variant="ghost"
             size="icon"
-            className="hidden sm:inline-flex"
+            className="hidden sm:inline-flex text-[#1e1b4b]"
             aria-label="Wishlist"
           >
             <Heart className="h-5 w-5" />

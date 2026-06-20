@@ -1,7 +1,7 @@
 "use client";
 
-import { AdminUsers } from "@/components/admin/pages/users";
+import { UsersList } from "@/components/admin/users/users-list";
 
 export default function UsersPage() {
-  return <AdminUsers />;
+  return <UsersList />;
 }

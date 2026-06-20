@@ -401,29 +401,28 @@ const PRODUCT_SEEDS: ProductSeed[] = [
   },
 ];
 
-// Map mock-data slugs to real backend image paths
-const API = "http://localhost:4000";
+// Map mock-data slugs to real local image paths
 const IMG_MAP: Record<string, string> = {
-  "mumlove-glass-feeding-bottle": `${API}/images/products/mumlove-glass-feeding-bottle.webp`,
-  "applebear-wide-neck-pp-bottle": `${API}/images/products/applebear-wide-neck-pp-bottle.webp`,
-  "philips-avent-natural-response-260ml": `${API}/images/products/philips-avent-260ml-bottle.webp`,
-  "philips-avent-125ml-bottle": `${API}/images/products/philips-avent-125ml-bottle.webp`,
-  "intelligent-rh228-automatic-double-breast-pump": `${API}/images/products/intelligent-rh228-double-breast-pump.webp`,
-  "only-baby-manual-breast-pump": `${API}/images/products/only-baby-manual-breast-pump.webp`,
-  "baby-smile-washable-breast-pad-4pcs": `${API}/images/products/baby-smile-washable-breast-pad.webp`,
-  "momeasy-washable-breast-pad-6pcs": `${API}/images/products/momeasy-washable-breast-pad.webp`,
-  "branded-multifunctional-crossbody-mommy-bag": `${API}/images/products/imported-multifunctional-mommy-bag.png`,
-  "portable-car-design-tiffin-box": `${API}/images/products/portable-car-design-tiffin-box.png`,
-  "multifunctional-japanese-style-lunch-box": `${API}/images/products/multifunctional-japanese-lunch-box.png`,
-  "creative-kids-double-layer-stainless-steel-lunch-box": `${API}/images/products/creative-kids-stainless-lunch-box.jpg`,
-  "creative-baby-bus-straw-water-cup": `${API}/images/products/creative-baby-bus-straw-water-cup.png`,
-  "bamboo-fiber-kids-tableware-set": `${API}/images/products/bamboo-fiber-kids-tableware-set.png`,
-  "kids-summer-short-sleeve-knitted-set": `${API}/images/products/kids-summer-short-sleeve-knitted-set.png`,
-  "imported-bubble-print-two-piece-outfit": `${API}/images/products/imported-bubble-print-two-piece-outfit.png`,
-  "strawberry-design-baby-girl-party-frock": `${API}/images/products/strawberry-design-baby-girl-party-frock.jpg`,
-  "sunflower-design-pure-cotton-frock": `${API}/images/products/sunflower-design-pure-cotton-frock.jpg`,
-  "childrens-premium-imported-hair-comb": `${API}/images/products/childrens-premium-imported-hair-comb.webp`,
-  "safe-baby-nasal-aspirator": `${API}/images/products/safe-baby-nasal-aspirator.png`,
+  "mumlove-glass-feeding-bottle": "/images/products/mumlove-glass-feeding-bottle.webp",
+  "applebear-wide-neck-pp-bottle": "/images/products/applebear-wide-neck-pp-bottle.webp",
+  "philips-avent-natural-response-260ml": "/images/products/philips-avent-260ml-bottle.webp",
+  "philips-avent-125ml-bottle": "/images/products/philips-avent-125ml-bottle.webp",
+  "intelligent-rh228-automatic-double-breast-pump": "/images/products/intelligent-rh228-double-breast-pump.webp",
+  "only-baby-manual-breast-pump": "/images/products/only-baby-manual-breast-pump.webp",
+  "baby-smile-washable-breast-pad-4pcs": "/images/products/baby-smile-washable-breast-pad.webp",
+  "momeasy-washable-breast-pad-6pcs": "/images/products/momeasy-washable-breast-pad.webp",
+  "branded-multifunctional-crossbody-mommy-bag": "/images/products/imported-multifunctional-mommy-bag.png",
+  "portable-car-design-tiffin-box": "/images/products/portable-car-design-tiffin-box.png",
+  "multifunctional-japanese-style-lunch-box": "/images/products/multifunctional-japanese-lunch-box.png",
+  "creative-kids-double-layer-stainless-steel-lunch-box": "/images/products/creative-kids-stainless-lunch-box.jpg",
+  "creative-baby-bus-straw-water-cup": "/images/products/creative-baby-bus-straw-water-cup.png",
+  "bamboo-fiber-kids-tableware-set": "/images/products/bamboo-fiber-kids-tableware-set.png",
+  "kids-summer-short-sleeve-knitted-set": "/images/products/kids-summer-short-sleeve-knitted-set.png",
+  "imported-bubble-print-two-piece-outfit": "/images/products/imported-bubble-print-two-piece-outfit.png",
+  "strawberry-design-baby-girl-party-frock": "/images/products/strawberry-design-baby-girl-party-frock.jpg",
+  "sunflower-design-pure-cotton-frock": "/images/products/sunflower-design-pure-cotton-frock.jpg",
+  "childrens-premium-imported-hair-comb": "/images/products/childrens-premium-imported-hair-comb.webp",
+  "safe-baby-nasal-aspirator": "/images/products/safe-baby-nasal-aspirator.png",
 };
 
 // Build full Product[] from seeds

@@ -37,9 +37,9 @@ const SECURITY_HEADERS = [
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: https: blob: http://localhost:4000",
+      "img-src 'self' data: https: blob:",
       "media-src 'self' https:",
-      "connect-src 'self' http://localhost:4000 https:",
+      "connect-src 'self' https:",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -48,7 +48,7 @@ const SECURITY_HEADERS = [
   },
   // Cross-Origin policies for isolated context
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-  { key: "Cross-Origin-Resource-Policy", value: "same-site" },
+  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
 ];
 
 const nextConfig: NextConfig = {
@@ -69,11 +69,7 @@ const nextConfig: NextConfig = {
     deviceSizes: [360, 480, 640, 768, 1024, 1280, 1600, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     // Allow placeholder.co images in the demo
-    remotePatterns: [
-      { protocol: "http", hostname: "localhost", port: "4000" },
-      { protocol: "https", hostname: "babyplanet-bd.com" },
-      { protocol: "https", hostname: "cdn.babyplanet-bd.com" },
-    ],
+    remotePatterns: [],
     // Cache optimized images for 60 seconds on CDN, 30 days in browser
     minimumCacheTTL: 60,
     // Lazy loading + async decode for below-the-fold images

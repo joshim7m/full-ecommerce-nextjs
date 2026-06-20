@@ -1,7 +1,7 @@
 "use client";
 
-import { AdminCategories } from "@/components/admin/pages/categories";
+import { CategoriesList } from "@/components/admin/categories/categories-list";
 
 export default function CategoriesPage() {
-  return <AdminCategories />;
+  return <CategoriesList />;
 }

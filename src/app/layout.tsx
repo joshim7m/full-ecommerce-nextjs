@@ -54,14 +54,17 @@ export const metadata: Metadata = {
       "facebook-domain-verification": "facebook-verification-token-here",
     },
   },
+  icons: {
+    icon: "/favicon.svg",
+  },
   // Asset hints
   assets: [SITE_CONFIG.logo, SITE_CONFIG.ogImage],
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#b45309" },
-    { media: "(prefers-color-scheme: dark)", color: "#7c2d12" },
+    themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ff4d80" },
+    { media: "(prefers-color-scheme: dark)", color: "#be185d" },
   ],
   width: "device-width",
   initialScale: 1,

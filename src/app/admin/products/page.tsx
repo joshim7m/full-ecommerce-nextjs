@@ -1,7 +1,7 @@
 "use client";
 
-import { AdminProducts } from "@/components/admin/pages/products";
+import { ProductsList } from "@/components/admin/products/products-list";
 
 export default function ProductsPage() {
-  return <AdminProducts />;
+  return <ProductsList />;
 }

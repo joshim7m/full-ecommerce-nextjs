@@ -92,8 +92,8 @@ export function StorefrontHome() {
   return (
     <div className="flex flex-col">
       {/* HERO CAROUSEL */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-amber-50 via-rose-50 to-orange-50">
-        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, oklch(0.94 0.04 75) 0, transparent 40%), radial-gradient(circle at 80% 70%, oklch(0.94 0.04 25) 0, transparent 40%)" }} />
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#FFF5E9] via-[#F6979F]/20 to-[#FFF9F3]">
+        <div className="absolute inset-0 opacity-40" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, oklch(0.9747 0.0192 72.6) 0, transparent 40%), radial-gradient(circle at 80% 70%, oklch(0.6829 0.2151 7.9 / 0.12) 0, transparent 40%)" }} />
         <Carousel setApi={setApi} opts={{ loop: true, align: "start" }} className="relative">
           <CarouselContent>
             {HERO_SLIDES.map((slide, i) => (
@@ -115,7 +115,7 @@ export function StorefrontHome() {
                         {slide.ctaLabel}
                         <ArrowRight className="h-4 w-4" />
                       </Button>
-                      <Button size="lg" variant="outline" onClick={() => router.push(`/category/${slide.ctaSecondarySlug}`)}>
+                      <Button size="lg" variant="outline" className="border-[#1e1b4b]/20 text-[#1e1b4b] hover:bg-[#1e1b4b]/5" onClick={() => router.push(`/category/${slide.ctaSecondarySlug}`)}>
                         {slide.ctaSecondary}
                       </Button>
                     </div>
@@ -134,7 +134,7 @@ export function StorefrontHome() {
                     <img
                       src={slide.imageSrc()}
                       alt={slide.imageAlt}
-                      className="aspect-square w-full max-w-sm rounded-2xl border object-cover shadow-lg"
+                      className="aspect-square w-full max-w-sm rounded-2xl border border-primary/20 object-cover shadow-lg"
                     />
                   </div>
                 </div>
@@ -170,10 +170,10 @@ export function StorefrontHome() {
               <button
                 key={cat.id}
                 onClick={() => router.push(`/category/${cat.slug}`)}
-                className="group relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-card p-5 text-center transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+                className="group relative flex flex-col items-center justify-center overflow-hidden rounded-xl border border-primary/10 bg-white p-5 text-center transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
               >
-                <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-accent transition-transform group-hover:scale-110">
-                  <Tag className="h-8 w-8 text-muted-foreground" />
+                <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-[#ff4d80]/10 transition-transform group-hover:scale-110">
+                  <Tag className="h-8 w-8 text-[#ff4d80]" />
                 </div>
                 <h3 className="text-sm font-semibold leading-tight text-foreground">{cat.name}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{cat.productCount} products</p>
